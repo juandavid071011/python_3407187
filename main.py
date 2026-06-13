@@ -1,14 +1,11 @@
 from fastapi import FastAPI, HTTPException
-from pydantic import BaseModel
+from modelos.clientes import Cliente
 
 app = FastAPI()
 
 lista_clientes = []
+lista_facturas = []
 
-class Cliente(BaseModel):
-    id: int
-    nombre: str
-    descripcion: str | None = None
 
 @app.get("/clientes")
 def listar_clientes():
@@ -33,4 +30,19 @@ def eliminar_cliente(id:int):
         if cliente.id == id:
             del lista_clientes[i]
             return {"mensaje": "Cliente eliminado exitosamente"}
-    raise HTTPException(status_code=404, detail="Cliente no encontrado")    
+    raise HTTPException(status_code=404, detail="Cliente no encontrado")   
+
+
+
+
+
+
+
+
+
+
+
+
+@app.get("/facturas")
+def listar_facturas():
+    return lista_facturas  
