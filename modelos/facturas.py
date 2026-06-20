@@ -2,8 +2,16 @@ from pydantic import BaseModel
 from clientes import Cliente
 
 
-class Facturas(BaseModel):
-    id: int
+class FacturasBase(BaseModel):
     fecha: str
-    valor_toital: float
+    valor_total: float
     cliente: Cliente
+    
+class FacturaCrear(FacturasBase):
+    pass
+
+class FacturaEditar(FacturasBase):
+    pass
+
+class Factura(FacturasBase):
+    id: int | None = None
