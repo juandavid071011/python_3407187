@@ -1,12 +1,13 @@
 from pydantic import BaseModel
+from sqlmodel import SQLModel, Field, Relationship
 
 
 # modelo de clientes
-class ClienteBase(BaseModel):
+class ClienteBase(SQLModel):
     # validacion con pydantic
-    nombre: str
-    email: str
-    descripcion: str | None = None
+    nombre: str = Field(default=None)
+    email: str = Field(default=None)
+    descripcion: str | None = Field(default=None)
 
 
 class ClienteCrear(ClienteBase):
@@ -15,5 +16,10 @@ class ClienteCrear(ClienteBase):
 class ClienteEditar(ClienteBase):
     pass
 
-class Cliente(ClienteBase):
-    id: int | None = None
+class Cliente(ClienteBase, table=True):
+    id: int | None = Field(default=None, primary_key=True)
+    #relacion virtual con factura   
+    factura: list["Factura"] = Relationship(back_populates="cliente")
+    
+class ClienteLeer(ClienteBase):
+    id: int

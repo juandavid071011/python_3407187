@@ -1,7 +1,9 @@
 from fastapi import APIRouter, HTTPException, status
-from ..modelos.facturas import Factura, FacturaCrear, FacturaEditar
-from ..modelos.clientes import Cliente
+from ..modelos.facturas import Factura, FacturaCrear, FacturaEditar, FacturaLeer, facturaLeerCompuesta
+from ..modelos.clientes import Cliente, ClienteLeer
 from ..listas import lista_clientes, lista_facturas
+from ..conexion_bd import Sesion_independecia
+from sqlmodel import select
 
 rutas_facturas = APIRouter()
 
@@ -10,8 +12,10 @@ rutas_facturas = APIRouter()
 
 
 # listar todas las facturas
-@rutas_facturas.get("/facturas", response_model=list[Factura])
-async def listar_facturas():
+@rutas_facturas.get("/facturas", response_model=list[FacturaLeerCompuesta])
+async def listar_facturas(sesion: Sesion_independecia):
+    consulta =select(Factura)
+    lista_facturas =sesion.exec(consulta).all()
     return lista_facturas
 
 #listar una sola factura
@@ -25,23 +29,22 @@ async def listar_factura(id_factura: int):
 
 #  crear facturas
 @rutas_facturas.post("/facturas/{id_cliente}", response_model=Factura)
-async def crear_facturas(id_cliente: int, datos_factura: FacturaCrear):
+async def crear_facturas(id_cliente: int, datos_factura: FacturaCrear, sesion: Sesion_independecia):
     #buscar cliente
-    cliente_encontrado = None
-    for cliente in lista_clientes:
-       if cliente.id == id_cliente:
-           cliente_encontrado = cliente
+    cliente_encontrado = sesion.get(Cliente, id_cliente)
     # si no existe cliente 
     if not cliente_encontrado:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"El cliente con id {id_cliente} no existe") 
 
 
     # validar datos factura
-    factura_val = Factura.model_validate(datos_factura.model_dump())
-    factura_val.cliente = cliente_encontrado
-    # id de la factura
-    factura_val.id = len(lista_facturas)
-    lista_facturas.append(factura_val)
+    factura_dict = datos_factura.model_dump()
+    factura_dict["id_cliente"] = id_cliente
+    factura_val = Factura.model_validate(factura_dict)
+    #guardar en base de datos
+    sesion.add(factura_val)
+    sesion.commit()
+    sesion.refresh(factura_val)
     return factura_val
 
 # de editar facturas
