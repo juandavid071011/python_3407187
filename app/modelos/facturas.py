@@ -11,15 +11,14 @@ class FacturasBase(SQLModel):
     
     @computed_field
     @property
-    def vr_total (self) -> float:
-        
-total_factura = 0.0
-    if  self.transaccones == None:
+    def vr_total(self) -> float:
+        total_factura = 0.0
+        if  self.transaccones == None:
+            return total_factura
+    #recorrer la lista de transacciones, segun el id de la factura actual
+        for transaccion in self.transaccones:
+            total_factura += transaccion.vr_unitario * transaccion.cantidad
         return total_factura
-        #recorrer la lista de transacciones, segun el id de la factura actual
-    for transaccion in self.transaccones:
-        total_factura += transaccion.vr_unitario * transaccion.cantidad
-        return 0.0
         
         
         
@@ -43,5 +42,5 @@ class FacturaLeer(FacturasBase):
     cliente: ClienteLeer
     #pero no es reconmedable, por las buenas practicas 
     #transacciones: list[TransaccionLeer] = []
-class FacturaLeerCompuesta(FacturasLeer):
+class FacturaLeerCompuesta(FacturaLeer):
     trasacciones: list[Transaccion] = []

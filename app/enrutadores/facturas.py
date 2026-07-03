@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, status
-from ..modelos.facturas import Factura, FacturaCrear, FacturaEditar, FacturaLeer, facturaLeerCompuesta
+from ..modelos.facturas import Factura, FacturaCrear, FacturaEditar, FacturaLeer, FacturaLeerCompuesta
 from ..modelos.clientes import Cliente, ClienteLeer
 from ..listas import lista_clientes, lista_facturas
 from ..conexion_bd import Sesion_independecia
